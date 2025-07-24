@@ -33,6 +33,8 @@ export const signUp = async(req, res) => {
         // jwt
         generateTokenAndSetCookie(res, user._id);
 
+        // TODO: email or phone sms send system must be added on this place
+
         await user.save();
 
         res.status(201).json({
@@ -47,4 +49,103 @@ export const signUp = async(req, res) => {
     } catch (error) {
         res.status(400).json({success: false, message: error.message});
     }
+}
+
+export const logIn = async(req, res) => {    
+    try {
+        const { email, phone, emailOrPhone, password } = req.body;
+        const identifier = emailOrPhone || email || phone;
+        
+        if (!identifier || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email/Phone and password are required"
+            });
+        }
+
+        const user = await User.findOne({
+            $or: [
+                { email: identifier },
+                { phone: identifier }
+            ]
+        });
+
+        if(!user) {
+            return res.status(400).json({success: false, message: "Invalid credentials"})
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordValid) {
+            return res.status(400).json({success: false, message: "Invalid credentials"})
+        }
+
+        if (!user.verified) {
+            return res.status(403).json({
+                success: false,
+                message: "Please verify your account first"
+            });
+        }
+
+        generateTokenAndSetCookie(res, user._id);
+
+        res.status(200).json({
+            success: true,
+            message: "Logged in successfully",
+            user: {
+                ...user._doc,
+                password: undefined,
+            }
+        })
+
+    } catch (error) {
+        res.status(400).json({success: false, message: error.message})
+    }
+}
+
+export const verifyOtp = async(req, res) => {
+    const {code} = req.body;
+    
+    try {
+        const user = await User.findOne({
+            otp: code,
+            verificationTokenExpiresAt: { $gt: Date.now()}
+        });        
+
+        if(!user) {
+            return res.status(400).json({success: false, message: "Invalid or expired verification code"})
+        }
+
+        if (user.verified) {
+            return res.status(400).json({ success: false, message: "User already verified" });
+        }
+
+        if (!user.otp || !user.verificationTokenExpiresAt) {
+            return res.status(400).json({ success: false, message: "No OTP found. Please request again." });
+        }
+
+        if (user.otp !== code) {
+            return res.status(400).json({ success: false, message: "Invalid OTP" });
+        }
+
+        if (user.verificationTokenExpiresAt < Date.now()) {
+            return res.status(400).json({ success: false, message: "OTP expired" });
+        }
+
+        user.verified = true;
+        user.otp = null;
+        user.verificationTokenExpiresAt = null;
+
+        await user.save();
+
+        res.status(200).json({success: true, message: "Email verification successful"})
+
+    } catch (error) {
+        res.status(500).json({success: false, message: "Server Error"})
+    }
+}
+
+export const logOut = async(req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({success: true, message: "Logged out successfully"})
 }
