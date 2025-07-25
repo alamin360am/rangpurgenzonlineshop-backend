@@ -1,14 +1,15 @@
 import {User} from "../models/user.model.js";
 import bcrypt from 'bcryptjs'
 import { generateTokenAndSetCookie } from "../utils/jwt.js";
+import { sendVerificationEmail } from "../utils/sendEmail.js";
 
 export const signUp = async(req, res) => {
     const {name, email, phone, password} = req.body;
 
     try {
 
-        if (!email && !phone) {
-            return res.status(400).json({ message: "Email or Phone is required" });
+        if (!email || !phone) {
+            return res.status(400).json({ message: "Email and Phone is required" });
         }
 
         if(!name || !password) {
@@ -33,7 +34,8 @@ export const signUp = async(req, res) => {
         // jwt
         generateTokenAndSetCookie(res, user._id);
 
-        // TODO: email or phone sms send system must be added on this place
+        // Email sending
+        await sendVerificationEmail(name, email, verificationToken);
 
         await user.save();
 
@@ -104,16 +106,17 @@ export const logIn = async(req, res) => {
 }
 
 export const verifyOtp = async(req, res) => {
-    const {code} = req.body;
+    const {email, code} = req.body;
     
-    try {
-        const user = await User.findOne({
-            otp: code,
-            verificationTokenExpiresAt: { $gt: Date.now()}
-        });        
+    try {        
+        if(!email || !code) {
+            return res.status(400).json({success: false, message: "Email and verification code is required"})
+        }
+        
+        const user = await User.findOne({email});        
 
         if(!user) {
-            return res.status(400).json({success: false, message: "Invalid or expired verification code"})
+            return res.status(400).json({success: false, message: "User Not found"})
         }
 
         if (user.verified) {
