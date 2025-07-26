@@ -8,7 +8,10 @@ import userRouter from './routes/userRouter.js';
 const app = express();
 
 dotenv.config();
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000", // আপনি যেখানে frontend host করছেন
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 

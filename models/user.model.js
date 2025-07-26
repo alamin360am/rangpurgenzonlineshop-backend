@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     otp: { type: String },
     role: { type: String, default: 'user' },
     resetPasswordToken: String,
-    resetPasswordExpiresAt: Date,
+    resetPasswordExpires: Date,
     verificationTokenExpiresAt: Date,
 }, { timestamps: true });
 
