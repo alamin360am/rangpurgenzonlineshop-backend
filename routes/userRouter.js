@@ -13,3 +13,12 @@ userRouter.post('/forgot-password', forgotPassword); // if forget password an ot
 userRouter.post('/reset-password', resetPassword); // after verify otp user can reset password
 
 export default userRouter;
+
+// TODO: Limit request for log in or sign up
+// import rateLimit from "express-rate-limit"
+
+// export const loginLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 মিনিট
+//   max: 5, // ৫ বার ট্রাই করা যাবে
+//   message: "Too many login attempts. Please try again later."
+// });

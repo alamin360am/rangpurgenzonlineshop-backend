@@ -46,3 +46,52 @@ export const getVerificationEmailHtml = (otp, username) => {
   </html>
   `;
 };
+
+export const getForgetPasswordEmailHtml = (link, username) => {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Email Verification</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; margin: 40px auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden;">
+            <tr>
+              <td style="background-color: #4F46E5; padding: 20px 0; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0;">Password Reset Link</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 30px; text-align: center;">
+                <p style="font-size: 18px; color: #333333;">Hello ${username},</p>
+                <p style="font-size: 16px; color: #555555;">
+                  You have requested for change password. You can change password by using following link:
+                </p>
+                <div style="margin: 30px 0;">
+                  ${link}
+                </div>
+                <p style="font-size: 14px; color: #999999;">
+                  If you did not request this, please ignore this email.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="background-color: #f4f4f4; text-align: center; padding: 20px;">
+                <p style="font-size: 12px; color: #999999;">
+                  &copy; ${new Date().getFullYear()} Rangpur Zen-Z Online Shop. All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `;
+};

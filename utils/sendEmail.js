@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export const sendEmail = async (to, template) => {
+export const sendEmail = async (to, subject, template) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -12,7 +12,7 @@ export const sendEmail = async (to, template) => {
   const mailOptions = {
     from: `"Rangpur Gen-Z Online Shop" <${process.env.EMAIL_USER}>`,
     to,
-    subject: "Your OTP Code",
+    subject: subject,
     html: template
   };
 

@@ -1,8 +1,9 @@
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import {User} from "../models/user.model.js";
 import { generateTokenAndSetCookie } from "../utils/jwt.js";
 import {sendEmail} from '../utils/sendEmail.js'
-import {getVerificationEmailHtml} from '../utils/emailTemplate.js'
+import {getForgetPasswordEmailHtml, getVerificationEmailHtml} from '../utils/emailTemplate.js'
 
 export const signUp = async(req, res) => {
     const {name, email, phone, password} = req.body;
@@ -36,7 +37,7 @@ export const signUp = async(req, res) => {
         generateTokenAndSetCookie(res, user._id);
 
         // Email sending
-        await sendEmail(email, getVerificationEmailHtml(verificationToken, name))
+        await sendEmail(email, "Your verification code for sign in", getVerificationEmailHtml(verificationToken, name))
 
         await user.save();
 
@@ -195,15 +196,9 @@ export const forgotPassword = async (req, res) => {
         await user.save();
 
         // Email link (frontend will build a reset page based on this token)
-        const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
-        const html = `
-            <h2>Reset Your Password</h2>
-            <p>You requested a password reset. Click below:</p>
-            <a href="${resetLink}" style="color: blue;">Reset Password</a>
-            <p>This link is valid for 10 minutes.</p>
-        `;
-
-        await sendEmail(email, 'Reset Your Password', html);
+        const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+        
+        await sendEmail(email, "Password Reset Link", getForgetPasswordEmailHtml(resetLink, user.name));
 
         res.status(200).json({ success: true, message: 'Reset link sent to your email' });
 
