@@ -1,5 +1,5 @@
 import express from 'express'
-import { changePassword, forgotPassword, logIn, logOut, resetPassword, signUp, verifyOtp } from '../controller/user.controller.js';
+import { changePassword, checkAuth, forgotPassword, logIn, logOut, resetPassword, signUp, verifyOtp } from '../controller/user.controller.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 const userRouter = express.Router();
@@ -11,6 +11,8 @@ userRouter.post('/logout', logOut); // for log out
 userRouter.post('/change-password', protect, changePassword); // if user want to change password, should provide previous password for security.
 userRouter.post('/forgot-password', forgotPassword); // if forget password an otp is send to email
 userRouter.post('/reset-password', resetPassword); // after verify otp user can reset password
+
+userRouter.get("/check", protect, checkAuth);
 
 export default userRouter;
 

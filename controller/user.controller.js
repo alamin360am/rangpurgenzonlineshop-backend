@@ -19,7 +19,7 @@ export const signUp = async(req, res) => {
         }
 
         const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-        if (existingUser) return res.status(400).json({ msg: "User already exists" });
+        if (existingUser) return res.status(400).json({ message: "User already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10)
         const verificationToken = Math.floor(100000 + Math.random()* 900000).toString();
@@ -232,4 +232,13 @@ export const resetPassword = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server Error' });
     }
+};
+
+export const checkAuth = (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
