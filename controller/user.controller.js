@@ -47,6 +47,7 @@ export const signUp = async(req, res) => {
             user: {
                 ...user._doc,
                 password: undefined,
+                otp: undefined,
             }
         })
 
@@ -84,13 +85,6 @@ export const logIn = async(req, res) => {
             return res.status(400).json({success: false, message: "Invalid credentials"})
         }
 
-        if (!user.verified) {
-            return res.status(403).json({
-                success: false,
-                message: "Please verify your account first"
-            });
-        }
-
         generateTokenAndSetCookie(res, user._id);
 
         res.status(200).json({
@@ -99,6 +93,7 @@ export const logIn = async(req, res) => {
             user: {
                 ...user._doc,
                 password: undefined,
+                otp: undefined
             }
         })
 
@@ -234,11 +229,16 @@ export const resetPassword = async (req, res) => {
     }
 };
 
-export const checkAuth = (req, res) => {
-  try {
-    res.status(200).json(req.user);
+export const checkAuth = async(req, res) => {
+    try {
+    const user = await User.findById(req.user.id).select("-otp");
+      if(!user) {
+        return res.status(404).json({message: "User not found"});
+      }
+
+      res.json(user);
   } catch (error) {
-    console.log("Error in checkAuth controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({message: "Server error", error: error.message});
   }
+
 };
